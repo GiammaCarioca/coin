@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Coin from './Coin';
+import { choice } from './helpers';
 
 export default class CoinContainer extends Component {
 	static defaultProps = {
@@ -14,31 +15,32 @@ export default class CoinContainer extends Component {
 			totalTails: 0,
 			currentSide: null
 		};
-		this.flip = this.flip.bind(this);
+		this.handleClick = this.handleClick.bind(this);
 	}
 
-	flip() {
-		const idx = Math.floor(Math.random() * this.props.sides.length);
-		const currentSide = this.props.sides[idx];
-		currentSide === 'heads'
-			? this.setState(curState => ({
-					totalFlips: curState.totalFlips + 1,
-					totalHeads: curState.totalHeads + 1,
-					currentSide: currentSide
-				}))
-			: this.setState(curState => ({
-					totalFlips: curState.totalFlips + 1,
-					totalTails: curState.totalTails + 1,
-					currentSide: currentSide
-				}));
+	flipCoin() {
+		const newCoin = choice(this.props.sides);
+		this.setState(oldState => {
+			return {
+				currentSide: newCoin,
+				totalFlips: oldState.totalFlips + 1,
+				totalHeads: oldState.totalHeads + (newCoin === 'heads' ? 1 : 0),
+				totalTails: oldState.totalTails + (newCoin === 'tails' ? 1 : 0)
+			};
+		});
+	}
+
+	handleClick(e) {
+		this.flipCoin();
 	}
 
 	render() {
+		const { currentSide } = this.state;
 		return (
 			<div>
 				<h1>Let's flip a coin!</h1>
-				<Coin currentSide={this.state.currentSide} />
-				<button onClick={this.flip}>FLIP ME!</button>
+				{currentSide && <Coin currentSide={currentSide} />}
+				<button onClick={this.handleClick}>FLIP ME!</button>
 				<p>
 					Out of {this.state.totalFlips} flips, there have been {this.state.totalHeads} heads and{' '}
 					{this.state.totalTails} tails.
